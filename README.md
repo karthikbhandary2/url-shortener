@@ -8,9 +8,7 @@ A high-performance URL shortener service built with Go, Fiber framework, and Red
 - **Rate Limiting**: API quota system to prevent abuse
 - **Redis Caching**: High-performance data storage and retrieval
 - **URL Validation**: Comprehensive URL validation and sanitization
-- **Analytics Ready**: Track URL usage and statistics
 - **Docker Support**: Containerized deployment with Docker Compose
-- **RESTful API**: Clean and intuitive API endpoints
 
 ## 📁 Project Structure
 
@@ -174,12 +172,7 @@ The service validates URLs using multiple checks:
 - Malicious URL detection
 - Custom domain restrictions (configurable)
 
-## 📈 Monitoring and Logging
 
-- **Request Logging**: All requests are logged with timestamps
-- **Error Handling**: Comprehensive error responses
-- **Health Checks**: Built-in health check endpoints
-- **Metrics**: Redis connection and performance metrics
 
 ## 🚀 Production Deployment
 
@@ -211,41 +204,9 @@ DOMAIN=yourdomain.com
 API_QUOTA=100
 ```
 
-## 🧪 Testing
 
-### Unit Tests
-```bash
-cd api
-go test ./...
-```
 
-### Integration Tests
-```bash
-# Start services
-docker-compose up -d
 
-# Run tests
-go test -tags=integration ./tests/
-```
-
-### Load Testing
-```bash
-# Using Apache Bench
-ab -n 1000 -c 10 -H "Content-Type: application/json" \
-   -p test-data.json http://localhost:3000/api/v1
-```
-
-## 🔧 Configuration Options
-
-### Redis Configuration
-- **Persistence**: Configured for data durability
-- **Memory Policy**: LRU eviction for optimal performance
-- **Connection Pooling**: Optimized for concurrent requests
-
-### Application Configuration
-- **CORS**: Configurable cross-origin resource sharing
-- **Timeouts**: Request and database timeout settings
-- **Logging**: Structured logging with different levels
 
 ## 📝 API Response Codes
 
@@ -307,8 +268,4 @@ go mod download
 ```
 
 ### Debug Mode
-```bash
-# Enable debug logging
-export LOG_LEVEL=debug
-go run main.go
-```
+Enable Fiber's built-in logger by checking the main.go file.
