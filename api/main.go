@@ -8,7 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/joho/godotenv"
-	"github.com/karthikbhandary2/url-shortner/api/routes"
+	"github.com/karthikbhandary2/url-shortener/routes"
 )
 
 func setupRoutes(app *fiber.App) {

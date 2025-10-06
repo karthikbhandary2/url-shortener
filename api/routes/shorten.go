@@ -9,8 +9,8 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
-	"github.com/karthikbhandary2/url-shortner/api/database"
-	"github.com/karthikbhandary2/url-shortner/api/helpers"
+	"github.com/karthikbhandary2/url-shortener/database"
+	"github.com/karthikbhandary2/url-shortener/helpers"
 )
 
 type request struct {
@@ -37,7 +37,7 @@ func ShortenURL(c *fiber.Ctx) error {
 	redisClient := database.CreateClient(1)
 	defer redisClient.Close()
 
-	value, err :=redisClient.Get(database.Ctx, c.IP()).Result()
+	value, err := redisClient.Get(database.Ctx, c.IP()).Result()
 	if err == redis.Nil {
 		_ = redisClient.Set(database.Ctx, c.IP(), os.Getenv("API_QUOTA"), 30*time.Minute).Err()
 	} else if err != nil {
@@ -48,7 +48,7 @@ func ShortenURL(c *fiber.Ctx) error {
 
 		if val <= 0 {
 			limit, _ := redisClient.TTL(database.Ctx, c.IP()).Result()
-			return c.Status(fiber.StatusServiceUnavailable).JSON(fiber.Map{"error":"rate limit exceeded", "rate_limit_reset": limit / time.Nanosecond / time.Minute})
+			return c.Status(fiber.StatusServiceUnavailable).JSON(fiber.Map{"error": "rate limit exceeded", "rate_limit_reset": limit / time.Nanosecond / time.Minute})
 		}
 	}
 	// check if the input is an actual url
@@ -68,7 +68,7 @@ func ShortenURL(c *fiber.Ctx) error {
 	var id string
 	if body.CustomShort == "" {
 		id = uuid.New().String()[:6]
-	}else {
+	} else {
 		id = body.CustomShort
 	}
 
@@ -90,9 +90,30 @@ func ShortenURL(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "cannot connect to the DB"})
 	}
 
-
+	// response
+	resp := response{
+		URL:             body.URL,
+		CustomShort:     "",
+		Expiry:          body.Expiry,
+		XRateRemaining:  10,
+		XRateLimitReset: 30,
+	}
 
 	//decrease the quota after func call
 	redisClient.Decr(database.Ctx, c.IP())
-	return nil
+
+	val, _ := redisClient.Get(database.Ctx, c.IP()).Result()
+	if err == redis.Nil {
+    resp.XRateRemaining = 0  // or some default value
+	} else if err != nil {
+		// handle other errors
+	} else {
+		intVal, _ := strconv.Atoi(val)
+		resp.XRateRemaining = int64(intVal)
+	}
+	ttl, _ := redisClient.TTL(database.Ctx, c.IP()).Result()
+	resp.XRateLimitReset = ttl/ time.Nanosecond / time.Minute
+
+	resp.CustomShort = os.Getenv("DOMAIN") + "/" + id
+	return c.Status(fiber.StatusOK).JSON(resp)
 }

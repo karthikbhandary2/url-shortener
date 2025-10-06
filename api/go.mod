@@ -1,4 +1,4 @@
-module github.com/karthikbhandary2/url-shortner
+module github.com/karthikbhandary2/url-shortener
 
 go 1.24.0
 
