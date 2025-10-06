@@ -103,14 +103,8 @@ func ShortenURL(c *fiber.Ctx) error {
 	redisClient.Decr(database.Ctx, c.IP())
 
 	val, _ := redisClient.Get(database.Ctx, c.IP()).Result()
-	if err == redis.Nil {
-    resp.XRateRemaining = 0  // or some default value
-	} else if err != nil {
-		// handle other errors
-	} else {
-		intVal, _ := strconv.Atoi(val)
-		resp.XRateRemaining = int64(intVal)
-	}
+	intVal, _ := strconv.Atoi(val)
+	resp.XRateRemaining = int64(intVal)
 	ttl, _ := redisClient.TTL(database.Ctx, c.IP()).Result()
 	resp.XRateLimitReset = ttl/ time.Nanosecond / time.Minute
 
